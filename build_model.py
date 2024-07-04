@@ -1,7 +1,8 @@
 # 1. Imports:
 import pandas as pd
 import numpy as np
-from constants import window_size
+from constants import window_size, train_days
+
 # To run plt in jupyter or gg colab envirionment
 # %matplotlib inline
 from keras.models import Sequential
@@ -9,8 +10,10 @@ from keras.layers import LSTM, Dropout, Dense
 from sklearn.preprocessing import MinMaxScaler
 from download_data import get_data_file_name
 
+
 def get_model_file_name(coin):
     return f"./{coin}_model.h5"
+
 
 def build_model(coin):
     # 2. Read the dataset:
@@ -35,7 +38,7 @@ def build_model(coin):
     final_dataset = new_dataset.values
 
     # get range to train data and valid data
-    train_data = final_dataset
+    train_data = final_dataset[0:train_days, :]
 
     # scale close price to range 0,1
     scaler = MinMaxScaler(feature_range=(0, 1))
@@ -60,10 +63,6 @@ def build_model(coin):
     )
     lstm_model.add(LSTM(units=50))
     lstm_model.add(Dense(1))
-
-    inputs_data = new_dataset[len(new_dataset) - window_size :].values
-    inputs_data = inputs_data.reshape(-1, 1)
-    inputs_data = scaler.transform(inputs_data)
 
     lstm_model.compile(loss="mean_squared_error", optimizer="adam")
     lstm_model.fit(x_train_data, y_train_data, epochs=1, batch_size=1, verbose=2)
