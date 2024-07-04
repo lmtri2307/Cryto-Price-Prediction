@@ -17,28 +17,21 @@ def get_cryto_tab(coin):
     df = pd.read_csv(get_data_file_name(coin))
 
     df["Date"] = pd.to_datetime(df.Date, format="%Y-%m-%d")
+    df = df[["Date", "Close"]]
     df.index = df["Date"]
+    df = df.sort_index(ascending=True, axis=0)
+    df = df.drop("Date", axis=1)
 
-    data = df.sort_index(ascending=True, axis=0)
-    new_data = pd.DataFrame(index=range(0, len(df)), columns=["Date", "Close"])
+    data_ndarray = df.values
 
-    for i in range(0, len(data)):
-        new_data["Date"][i] = data["Date"][i]
-        new_data["Close"][i] = data["Close"][i]
-
-    new_data.index = new_data.Date
-    new_data.drop("Date", axis=1, inplace=True)
-
-    dataset = new_data.values
-
-    valid = dataset[train_days:, :]
+    valid = data_ndarray[-dashboard_days:, :]
 
     scaler = MinMaxScaler(feature_range=(0, 1))
-    scaler.fit(dataset)
+    scaler.fit(data_ndarray)
 
     model = load_model(get_model_file_name(coin))
 
-    inputs = new_data[len(new_data) - len(valid) - window_size :].values
+    inputs = df[len(df) - len(valid) - window_size :].values
     inputs = inputs.reshape(-1, 1)
     inputs = scaler.transform(inputs)
 
@@ -51,9 +44,8 @@ def get_cryto_tab(coin):
     closing_price = model.predict(X_test)
     closing_price = scaler.inverse_transform(closing_price)
 
-    valid = new_data[train_days:]
+    valid = df[-dashboard_days:]
     valid["Predictions"] = closing_price
-    valid = valid[-dashboard_days:]
 
     return dcc.Tab(
         label=f"{coin} Data",

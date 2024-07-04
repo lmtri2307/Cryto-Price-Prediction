@@ -21,28 +21,21 @@ def build_model(coin):
 
     # 3. Analyze the closing prices from dataframe:
     df["Date"] = pd.to_datetime(df.Date, format="%Y-%m-%d")
+    df = df[["Date", "Close"]]
     df.index = df["Date"]
 
     # 4. Sort the dataset on date time and filter “Date” and “Close” columns:
-    data = df.sort_index(ascending=True, axis=0)
-    new_dataset = pd.DataFrame(index=range(0, len(df)), columns=["Date", "Close"])
-
-    for i in range(0, len(data)):
-        new_dataset["Date"][i] = data["Date"][i]
-        new_dataset["Close"][i] = data["Close"][i]
-
-    # 5. Normalize the new filtered dataset:
-    # get close price column
-    new_dataset.index = new_dataset.Date
-    new_dataset.drop("Date", axis=1, inplace=True)
-    final_dataset = new_dataset.values
+    df = df.sort_index(ascending=True, axis=0)
+    df = df.drop("Date", axis=1)
+    
+    data_ndarray = df.values
 
     # get range to train data and valid data
-    train_data = final_dataset[0:train_days, :]
+    train_data = data_ndarray[0:train_days, :]
 
     # scale close price to range 0,1
     scaler = MinMaxScaler(feature_range=(0, 1))
-    scaled_data = scaler.fit_transform(final_dataset)
+    scaled_data = scaler.fit_transform(data_ndarray)
 
     x_train_data, y_train_data = [], []
 
