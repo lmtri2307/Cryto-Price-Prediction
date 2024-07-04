@@ -8,14 +8,10 @@ from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 from download_data import get_data_file_name
 from build_model import get_model_file_name
-from constants import train_days, window_size, dashboard_days
-
-coin = "BTC-USD"
+from constants import train_days, window_size, dashboard_days, coins
 
 
-def run_dashboard():
-    app = dash.Dash()
-
+def get_cryto_tab(coin):
     scaler = MinMaxScaler(feature_range=(0, 1))
 
     df = pd.read_csv(get_data_file_name(coin))
@@ -59,64 +55,72 @@ def run_dashboard():
     valid["Predictions"] = closing_price
     valid = valid[-dashboard_days:]
 
+    return dcc.Tab(
+        label=f"{coin} Data",
+        children=[
+            html.Div(
+                [
+                    html.H2(
+                        "Actual closing price",
+                        style={"textAlign": "center"},
+                    ),
+                    dcc.Graph(
+                        id="Actual Data",
+                        figure={
+                            "data": [
+                                go.Scatter(
+                                    x=valid.index,
+                                    y=valid["Close"],
+                                    mode="markers",
+                                )
+                            ],
+                            "layout": go.Layout(
+                                title="scatter plot",
+                                xaxis={"title": "Date"},
+                                yaxis={"title": "Closing Rate"},
+                            ),
+                        },
+                    ),
+                    html.H2(
+                        "LSTM Predicted closing price",
+                        style={"textAlign": "center"},
+                    ),
+                    dcc.Graph(
+                        id="Predicted Data",
+                        figure={
+                            "data": [
+                                go.Scatter(
+                                    x=valid.index,
+                                    y=valid["Predictions"],
+                                    mode="markers",
+                                )
+                            ],
+                            "layout": go.Layout(
+                                title="scatter plot",
+                                xaxis={"title": "Date"},
+                                yaxis={"title": "Closing Rate"},
+                            ),
+                        },
+                    ),
+                ]
+            )
+        ],
+    )
+
+
+def run_dashboard():
+    app = dash.Dash()
+
+    tabs = []
+    for coin in coins:
+        tabs.append(get_cryto_tab(coin))
+
     app.layout = html.Div(
         [
             html.H1("Cryto Price Analysis Dashboard", style={"textAlign": "center"}),
             dcc.Tabs(
                 id="tabs",
-                children=[
-                    dcc.Tab(
-                        label=f"{coin} Stock Data",
-                        children=[
-                            html.Div(
-                                [
-                                    html.H2(
-                                        "Actual closing price",
-                                        style={"textAlign": "center"},
-                                    ),
-                                    dcc.Graph(
-                                        id="Actual Data",
-                                        figure={
-                                            "data": [
-                                                go.Scatter(
-                                                    x=valid.index,
-                                                    y=valid["Close"],
-                                                    mode="markers",
-                                                )
-                                            ],
-                                            "layout": go.Layout(
-                                                title="scatter plot",
-                                                xaxis={"title": "Date"},
-                                                yaxis={"title": "Closing Rate"},
-                                            ),
-                                        },
-                                    ),
-                                    html.H2(
-                                        "LSTM Predicted closing price",
-                                        style={"textAlign": "center"},
-                                    ),
-                                    dcc.Graph(
-                                        id="Predicted Data",
-                                        figure={
-                                            "data": [
-                                                go.Scatter(
-                                                    x=valid.index,
-                                                    y=valid["Predictions"],
-                                                    mode="markers",
-                                                )
-                                            ],
-                                            "layout": go.Layout(
-                                                title="scatter plot",
-                                                xaxis={"title": "Date"},
-                                                yaxis={"title": "Closing Rate"},
-                                            ),
-                                        },
-                                    ),
-                                ]
-                            )
-                        ],
-                    ),
-                ],
+                children=tabs,
             ),
         ]
     )
