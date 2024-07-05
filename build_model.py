@@ -3,8 +3,6 @@ import pandas as pd
 import numpy as np
 from constants import window_size, train_days
 
-# To run plt in jupyter or gg colab envirionment
-# %matplotlib inline
 from keras.models import Sequential
 from keras.layers import LSTM, Dropout, Dense
 from sklearn.preprocessing import MinMaxScaler
@@ -14,17 +12,15 @@ from download_data import get_data_file_name
 def get_model_file_name(coin):
     return f"./{coin}_model.h5"
 
-
 def build_model(coin):
-    # 2. Read the dataset:
+    # Read the dataset:
     df = pd.read_csv(get_data_file_name(coin))
 
-    # 3. Analyze the closing prices from dataframe:
     df["Date"] = pd.to_datetime(df.Date, format="%Y-%m-%d")
     df = df[["Date", "Close"]]
     df.index = df["Date"]
 
-    # 4. Sort the dataset on date time and filter “Date” and “Close” columns:
+    # Sort the dataset on date time and filter “Date” and “Close” columns:
     df = df.sort_index(ascending=True, axis=0)
     df = df.drop("Date", axis=1)
     
@@ -49,7 +45,7 @@ def build_model(coin):
         x_train_data, (x_train_data.shape[0], x_train_data.shape[1], 1)
     )
 
-    # 6. Build and train the LSTM model:
+    # Build and train the LSTM model:
     lstm_model = Sequential()
     lstm_model.add(
         LSTM(units=50, return_sequences=True, input_shape=(x_train_data.shape[1], 1))

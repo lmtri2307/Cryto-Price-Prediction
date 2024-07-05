@@ -1,10 +1,10 @@
-from constants import coins, peroid
+from constants import peroid
 import yfinance as yf
 from pandas import DataFrame
 
 
-def download_data(ticker, peroid=peroid) -> DataFrame:
-    data = yf.download(ticker, period=peroid, interval="1d")
+def download_data(coin, peroid=peroid) -> DataFrame:
+    data = yf.download(coin, period=peroid, interval="1d")
     return data
 
 
