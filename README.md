@@ -16,10 +16,10 @@
 **Tải packages**
 `pip install -r requirements.txt`
 
-    **Chạy dashboard**
-    `python main-dashboard.py`
+- **Chạy dashboard**
+`python main-dashboard.py`
 
-    **Chạy cả quá trình: download data -> build models -> run dashboard**
-    `python main.py`
+- **Chạy cả quá trình: download data -> build models -> run dashboard**
+`python main.py`
 
 **Truy cập htpp://localhost:8050 trên browser**
